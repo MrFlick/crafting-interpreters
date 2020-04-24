@@ -3,10 +3,10 @@ using System;
 namespace crafting_interpreters
 {
     class Token {
-        readonly TokenType Type;
-        readonly String Lexeme;
-        readonly Object Literal;
-        readonly int Line;
+        public readonly TokenType Type;
+        public readonly String Lexeme;
+        public readonly Object Literal;
+        public readonly int Line;
 
         public Token(TokenType type, string lexeme, Object literal, int line)
         {
