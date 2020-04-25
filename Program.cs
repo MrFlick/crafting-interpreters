@@ -6,7 +6,9 @@ namespace crafting_interpreters
 {
     class Lox
     {
-        static Boolean hadError = false;
+        private static readonly Interpreter Interpreter = new Interpreter();
+        static bool hadError = false;
+        static bool hadRuntimeError = false;
 
         static void Main(string[] args)
         {
@@ -35,6 +37,7 @@ namespace crafting_interpreters
 
         private static void run(string source) {
             if (hadError) Environment.Exit(65);
+            if (hadRuntimeError) Environment.Exit(70);
             Scanner scanner = new Scanner(source);
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
@@ -43,10 +46,18 @@ namespace crafting_interpreters
             if (hadError) return;
 
             Console.WriteLine(new AstPrinter().print(expr));
+            Interpreter.interpret(expr);
         }
 
         public static void error(int line, string message) {
             report(line, "", message);
+        }
+
+        public static void runtimeError(RuntimeError error) {
+            Console.Error.WriteLine(error.Message);
+            Console.Error.WriteLine($"[line {error.Token.Line}]");
+            hadRuntimeError = true;
+
         }
 
         public static void error(Token token, string message) {
