@@ -19,6 +19,7 @@ namespace crafting_interpreters
             {"fun", TokenType.FUN},
             {"if", TokenType.IF},
             {"nil", TokenType.NIL},
+            {"or", TokenType.OR},
             {"print", TokenType.PRINT},
             {"return", TokenType.RETURN},
             {"super", TokenType.SUPER},

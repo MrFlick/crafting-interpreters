@@ -30,13 +30,13 @@ namespace crafting_interpreters
         private static void runPrompt() {
             for(;;) {
                 Console.Write("> ");
-                run(Console.ReadLine());
+                run(Console.ReadLine(), repl: true);
                 hadError = false;
                 hadRuntimeError = false;
             }
         }
 
-        private static void run(string source) {
+        private static void run(string source, bool repl=false) {
             if (hadError) Environment.Exit(65);
             if (hadRuntimeError) Environment.Exit(70);
             Scanner scanner = new Scanner(source);
@@ -46,7 +46,12 @@ namespace crafting_interpreters
 
             if (hadError) return;
 
-            Interpreter.interpret(statements);
+            if (repl) {
+                Interpreter.replInterpret(statements);
+            } else{
+                Interpreter.interpret(statements);
+            }
+            
         }
 
         public static void error(int line, string message) {

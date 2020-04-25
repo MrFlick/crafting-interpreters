@@ -16,6 +16,16 @@ namespace crafting_interpreters
                 Lox.runtimeError(error);
             }
         }
+
+        public void replInterpret(List<Stmt> statements) {
+            if (statements.Count==1 && statements[0] is Stmt.Expression single) {
+                Console.WriteLine(stringify(evaluate(single.Expr)));
+                return;
+            } else {
+                interpret(statements);
+            }
+        }
+
         public object visitBinaryExpr(Expr.Binary expr)
         {
             object left = evaluate(expr.Left);
@@ -69,6 +79,19 @@ namespace crafting_interpreters
         public object visitLiteralExpr(Expr.Literal expr)
         {
             return expr.Value;
+        }
+
+        public object visitLogicalExpr(Expr.Logical expr)
+        {
+            Object left = evaluate(expr.Left);
+
+            if (expr.Op.Type == TokenType.OR) {
+                if (isTruthy(left)) return left;
+            } else {
+                if (!isTruthy(left)) return left;
+            }
+            
+            return evaluate(expr.Right);
         }
 
         public object visitTernaryExpr(Expr.Ternary expr)
@@ -156,7 +179,16 @@ namespace crafting_interpreters
         public object visitExpressionStmt(Stmt.Expression stmt)
         {
             object value = evaluate(stmt.Expr);
-            System.Console.WriteLine(value);
+            return null;
+        }
+
+        public object visitIfStmt(Stmt.If stmt)
+        {
+            if (isTruthy(evaluate(stmt.Cond))) {
+                execute(stmt.ThenBranch);
+            } else if (stmt.ElseBranch != null) {
+                execute(stmt.ElseBranch);
+            }
             return null;
         }
 
@@ -177,13 +209,19 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitWhileStmt(Stmt.While stmt)
+        {
+            while(isTruthy(evaluate(stmt.Cond))) {
+                execute(stmt.Body);
+            }
+            return null;
+        }
+
         public object visitAssignExpr(Expr.Assign expr)
         {
             object value = evaluate(expr.Value);
             env.assign(expr.Name, value);
             return value;
         }
-
-
     }
 }

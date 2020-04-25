@@ -8,6 +8,7 @@ namespace crafting_interpreters {
             R visitTernaryExpr(Ternary expr);
             R visitGroupingExpr(Grouping expr);
             R visitLiteralExpr(Literal expr);
+            R visitLogicalExpr(Logical expr);
             R visitUnaryExpr(Unary expr);
             R visitVariableExpr(Variable expr);
         }
@@ -65,6 +66,19 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitLiteralExpr(this);
+            }
+        }
+        public class Logical : Expr {
+            public readonly Expr Left;
+            public readonly Token Op;
+            public readonly Expr Right;
+            public Logical(Expr left, Token op, Expr right) {
+                Left = left;
+                Op = op;
+                Right = right;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitLogicalExpr(this);
             }
         }
         public class Unary : Expr {

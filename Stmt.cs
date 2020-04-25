@@ -5,8 +5,10 @@ namespace crafting_interpreters {
         public interface Visitor<R> {
             R visitBlockStmt(Block stmt);
             R visitExpressionStmt(Expression stmt);
+            R visitIfStmt(If stmt);
             R visitPrintStmt(Print stmt);
             R visitVarStmt(Var stmt);
+            R visitWhileStmt(While stmt);
         }
         public abstract R accept<R>(Visitor<R> visitor);
         public class Block : Stmt {
@@ -27,6 +29,19 @@ namespace crafting_interpreters {
                 return visitor.visitExpressionStmt(this);
             }
         }
+        public class If : Stmt {
+            public readonly Expr Cond;
+            public readonly Stmt ThenBranch;
+            public readonly Stmt ElseBranch;
+            public If(Expr cond, Stmt thenBranch, Stmt elseBranch) {
+                Cond = cond;
+                ThenBranch = thenBranch;
+                ElseBranch = elseBranch;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitIfStmt(this);
+            }
+        }
         public class Print : Stmt {
             public readonly Expr Expr;
             public Print(Expr expr) {
@@ -45,6 +60,17 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitVarStmt(this);
+            }
+        }
+        public class While : Stmt {
+            public readonly Expr Cond;
+            public readonly Stmt Body;
+            public While(Expr cond, Stmt body) {
+                Cond = cond;
+                Body = body;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitWhileStmt(this);
             }
         }
     }

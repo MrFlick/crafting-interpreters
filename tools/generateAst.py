@@ -106,12 +106,15 @@ if __name__=="__main__":
         "Ternary:   Expr cond, Expr ifTrue, Expr ifFalse",
         "Grouping:  Expr expression",
         "Literal:   Object value",
+        "Logical:   Expr left, Token op, Expr right",
         "Unary:     Token op, Expr right",
         "Variable:  Token name",
     ])
     defineAst("../", "Stmt", [
         "Block:       List<Stmt> statements",
         "Expression:  Expr expr",
+        "If:          Expr cond, Stmt thenBranch, Stmt elseBranch",
         "Print:       Expr expr",
-        "Var:         Token name, Expr initilizer"
+        "Var:         Token name, Expr initilizer",
+        "While:       Expr cond, Stmt body",
     ])
