@@ -101,9 +101,17 @@ def defineAst(outputDir, baseName, types):
 
 if __name__=="__main__":
     defineAst("../", "Expr", [
+        "Assign:    Token name, Expr value",
         "Binary:    Expr left, Token op, Expr right",
         "Ternary:   Expr cond, Expr ifTrue, Expr ifFalse",
         "Grouping:  Expr expression",
         "Literal:   Object value",
-        "Unary:     Token op, Expr right"
+        "Unary:     Token op, Expr right",
+        "Variable:  Token name",
+    ])
+    defineAst("../", "Stmt", [
+        "Block:       List<Stmt> statements",
+        "Expression:  Expr expr",
+        "Print:       Expr expr",
+        "Var:         Token name, Expr initilizer"
     ])

@@ -32,6 +32,7 @@ namespace crafting_interpreters
                 Console.Write("> ");
                 run(Console.ReadLine());
                 hadError = false;
+                hadRuntimeError = false;
             }
         }
 
@@ -41,12 +42,11 @@ namespace crafting_interpreters
             Scanner scanner = new Scanner(source);
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
-            Expr expr = parser.parse();
+            List<Stmt> statements = parser.parse();
 
             if (hadError) return;
 
-            Console.WriteLine(new AstPrinter().print(expr));
-            Interpreter.interpret(expr);
+            Interpreter.interpret(statements);
         }
 
         public static void error(int line, string message) {

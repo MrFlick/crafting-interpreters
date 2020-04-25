@@ -1,11 +1,17 @@
+using System;
+using System.Collections.Generic;
+
 namespace crafting_interpreters
 {
-    class Interpreter : Expr.Visitor<object>
+    class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
-        public void interpret(Expr expression) {
+        private Envir env = new Envir();
+
+        public void interpret(List<Stmt> statements) {
             try {
-                object value = evaluate(expression);
-                System.Console.WriteLine(stringify(value));
+                foreach (Stmt s in statements) {
+                    execute(s);
+                }
             } catch (RuntimeError error) {
                 Lox.runtimeError(error);
             }
@@ -87,6 +93,11 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitVariableExpr(Expr.Variable expr)
+        {
+            return env.get(expr.Name);
+        }
+
         private void checkNumberOperator(Token op, object operand) {
             if(operand is double) return;
             throw new RuntimeError(op, "Operand must be a number.");
@@ -117,5 +128,62 @@ namespace crafting_interpreters
         private object evaluate(Expr expr) {
             return expr.accept(this);
         }
+
+        private void execute(Stmt statement) {
+            statement.accept(this);
+        }
+
+        private void executeBlock(List<Stmt> statements, Envir envir)
+        {
+            Envir previous = env;
+            try {
+                env = envir;
+                foreach (var s in statements) {
+                    execute(s);
+                }
+            } finally {
+                env = previous;
+            }
+        }
+
+
+        public object visitBlockStmt(Stmt.Block stmt)
+        {
+            executeBlock(stmt.Statements, new Envir(env));
+            return null;
+        }
+
+        public object visitExpressionStmt(Stmt.Expression stmt)
+        {
+            object value = evaluate(stmt.Expr);
+            System.Console.WriteLine(value);
+            return null;
+        }
+
+        public object visitPrintStmt(Stmt.Print stmt)
+        {
+            object value = evaluate(stmt.Expr);
+            System.Console.WriteLine(stringify(value));
+            return null;
+        }
+
+        public object visitVarStmt(Stmt.Var stmt)
+        {
+            object value = null;
+            if (stmt.Initilizer != null) {
+                value = evaluate(stmt.Initilizer);
+            }
+            env.define(stmt.Name.Lexeme, value);
+            return null;
+        }
+
+        public object visitAssignExpr(Expr.Assign expr)
+        {
+            object value = evaluate(expr.Value);
+            env.assign(expr.Name, value);
+            return value;
+        }
+
+
     }
 }

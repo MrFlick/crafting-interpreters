@@ -23,6 +23,14 @@ namespace crafting_interpreters
         public string visitUnaryExpr(Expr.Unary expr) {
             return parenthesize(expr.Op.Lexeme, expr.Right);
         }
+        public string visitVariableExpr(Expr.Variable expr)
+        {
+            return parenthesize("var", expr);
+        }
+        public string visitAssignExpr(Expr.Assign expr)
+        {
+            return parenthesize("assing", expr, expr.Value);
+        }
 
         private string parenthesize(string name, params Expr[] exprs) {
             StringBuilder builder = new StringBuilder();
@@ -36,5 +44,7 @@ namespace crafting_interpreters
 
             return builder.ToString();
         }
+
+
     }
 }
