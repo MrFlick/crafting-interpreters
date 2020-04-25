@@ -5,6 +5,7 @@ namespace crafting_interpreters {
         public interface Visitor<R> {
             R visitAssignExpr(Assign expr);
             R visitBinaryExpr(Binary expr);
+            R visitCallExpr(Call expr);
             R visitTernaryExpr(Ternary expr);
             R visitGroupingExpr(Grouping expr);
             R visitLiteralExpr(Literal expr);
@@ -35,6 +36,19 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitBinaryExpr(this);
+            }
+        }
+        public class Call : Expr {
+            public readonly Expr Callee;
+            public readonly Token Paren;
+            public readonly List<Expr> Arguments;
+            public Call(Expr callee, Token paren, List<Expr> arguments) {
+                Callee = callee;
+                Paren = paren;
+                Arguments = arguments;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitCallExpr(this);
             }
         }
         public class Ternary : Expr {

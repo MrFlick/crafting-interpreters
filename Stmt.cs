@@ -5,8 +5,10 @@ namespace crafting_interpreters {
         public interface Visitor<R> {
             R visitBlockStmt(Block stmt);
             R visitExpressionStmt(Expression stmt);
+            R visitFunctionStmt(Function stmt);
             R visitIfStmt(If stmt);
             R visitPrintStmt(Print stmt);
+            R visitReturnStmt(Return stmt);
             R visitVarStmt(Var stmt);
             R visitWhileStmt(While stmt);
         }
@@ -29,6 +31,19 @@ namespace crafting_interpreters {
                 return visitor.visitExpressionStmt(this);
             }
         }
+        public class Function : Stmt {
+            public readonly Token Name;
+            public readonly List<Token> Parameters;
+            public readonly List<Stmt> Body;
+            public Function(Token name, List<Token> parameters, List<Stmt> body) {
+                Name = name;
+                Parameters = parameters;
+                Body = body;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitFunctionStmt(this);
+            }
+        }
         public class If : Stmt {
             public readonly Expr Cond;
             public readonly Stmt ThenBranch;
@@ -49,6 +64,17 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitPrintStmt(this);
+            }
+        }
+        public class Return : Stmt {
+            public readonly Token Keyword;
+            public readonly Expr Value;
+            public Return(Token keyword, Expr value) {
+                Keyword = keyword;
+                Value = value;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitReturnStmt(this);
             }
         }
         public class Var : Stmt {

@@ -5,7 +5,14 @@ namespace crafting_interpreters
 {
     class Interpreter : Expr.Visitor<object>, Stmt.Visitor<object>
     {
-        private Envir env = new Envir();
+        public Envir globals = new Envir();
+        private Envir env;
+
+        public Interpreter()
+        {
+            env = globals;
+            globals.define("clock", new Functions.ClockFunction());
+        }
 
         public void interpret(List<Stmt> statements) {
             try {
@@ -14,15 +21,6 @@ namespace crafting_interpreters
                 }
             } catch (RuntimeError error) {
                 Lox.runtimeError(error);
-            }
-        }
-
-        public void replInterpret(List<Stmt> statements) {
-            if (statements.Count==1 && statements[0] is Stmt.Expression single) {
-                Console.WriteLine(stringify(evaluate(single.Expr)));
-                return;
-            } else {
-                interpret(statements);
             }
         }
 
@@ -69,6 +67,25 @@ namespace crafting_interpreters
             }
 
             return null;
+        }
+
+        public object visitCallExpr(Expr.Call expr)
+        {
+            object callee = evaluate(expr.Callee);
+            List<object> args = expr.Arguments.ConvertAll(
+                new Converter<Expr, object>(x => evaluate(x))
+            );
+            if(!(callee is LoxCallable)) {
+                throw new RuntimeError(expr.Paren, 
+                    "Can only call functions and classes");
+            }
+            LoxCallable function = (LoxCallable)callee;
+            if (args.Count != function.arity()) {
+                throw new RuntimeError(expr.Paren, 
+                    $"Expected {function.arity()} but got {args.Count}");
+
+            }
+            return function.call(this, args);
         }
 
         public object visitGroupingExpr(Expr.Grouping expr)
@@ -156,7 +173,7 @@ namespace crafting_interpreters
             statement.accept(this);
         }
 
-        private void executeBlock(List<Stmt> statements, Envir envir)
+        public void executeBlock(List<Stmt> statements, Envir envir)
         {
             Envir previous = env;
             try {
@@ -182,6 +199,13 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitFunctionStmt(Stmt.Function stmt)
+        {
+            LoxFunction function = new LoxFunction(stmt, env);
+            env.define(stmt.Name.Lexeme, function);
+            return null;
+        }
+
         public object visitIfStmt(Stmt.If stmt)
         {
             if (isTruthy(evaluate(stmt.Cond))) {
@@ -197,6 +221,16 @@ namespace crafting_interpreters
             object value = evaluate(stmt.Expr);
             System.Console.WriteLine(stringify(value));
             return null;
+        }
+
+
+        public object visitReturnStmt(Stmt.Return stmt)
+        {
+            Object value = null;
+            if (stmt.Value != null) {
+                value = evaluate(stmt.Value);
+            }
+            throw new LoxReturn(value);
         }
 
         public object visitVarStmt(Stmt.Var stmt)

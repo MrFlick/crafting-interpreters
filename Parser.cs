@@ -64,6 +64,7 @@ namespace crafting_interpreters
         private Stmt declaration() {
             try {
                 if (match(TokenType.VAR)) return varDeclaration();
+                if (match(TokenType.FUN)) return function("function");
                 return statement();
             } catch (ParseError) {
                 synchronize();
@@ -80,6 +81,9 @@ namespace crafting_interpreters
             }
             if (match(TokenType.PRINT)) {
                 return printStatement();
+            }
+            if (match(TokenType.RETURN)) {
+                return returnStatement();
             }
             if (match(TokenType.WHILE)) {
                 return whileStatement();
@@ -157,6 +161,16 @@ namespace crafting_interpreters
             return new Stmt.Print(value);
         }
 
+        private Stmt returnStatement() {
+            Token keyword = previous();
+            Expr value = null;
+            if (!check(TokenType.SEMICOLON)) {
+                value = expression();
+            }
+            consume(TokenType.SEMICOLON, "Expect ';' after value.");
+            return new Stmt.Return(keyword, value);
+        }
+
         private Stmt varDeclaration() {
             Token name = consume(TokenType.IDENTIFIER, "Expect variable name");
 
@@ -182,6 +196,24 @@ namespace crafting_interpreters
             Expr expr = expression();
             consume(TokenType.SEMICOLON, "Expect ';' after expression.");
             return new Stmt.Expression(expr);
+        }
+
+        private Stmt.Function function(string kind) {
+            Token name = consume(TokenType.IDENTIFIER, $"Expect {kind} name");
+            consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name");
+            List<Token> parameters = new List<Token>();
+            if (!check(TokenType.RIGHT_PAREN)) {
+                do {
+                    if (parameters.Count >= 255) {
+                        error(peek(), "Cannot have more than 255 parameters");
+                    }
+                    parameters.Add(consume(TokenType.IDENTIFIER, "Expect parameter name"));
+                } while (match(TokenType.COMMA));
+            }
+            consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters");
+            consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body");
+            List<Stmt> body = block();
+            return new Stmt.Function(name, parameters, body);
         }
 
         private List<Stmt> block() {
@@ -259,8 +291,34 @@ namespace crafting_interpreters
                 Expr right = primary();
                 return new Expr.Unary(op, right);
             } else {
-                return primary();
+                return call();
             }
+        }
+
+        private Expr call() {
+            Expr expr = primary();
+            while(true) {
+                if(match(TokenType.LEFT_PAREN)) {
+                    expr = finishCall(expr);
+                } else {
+                    break;
+                }
+            }
+            return expr;
+        }
+
+        private Expr finishCall(Expr callee) {
+            List<Expr> args = new List<Expr>();
+            if (!check(TokenType.RIGHT_PAREN)) {
+                do {
+                    if (args.Count >= 255) {
+                        error(peek(), "Cannot have more than 255 arguments");
+                    }
+                    args.Add(expression());
+                } while (match(TokenType.COMMA));
+            }
+            Token paren = consume(TokenType.RIGHT_PAREN, "Expected closing ')' after argumetns");
+            return new Expr.Call(callee, paren, args);
         }
 
         private Expr primary() {

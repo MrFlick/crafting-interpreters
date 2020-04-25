@@ -33,7 +33,11 @@ namespace crafting_interpreters
         }
         public string visitAssignExpr(Expr.Assign expr)
         {
-            return parenthesize("assing", expr, expr.Value);
+            return parenthesize("assign", expr, expr.Value);
+        }
+        public string visitCallExpr(Expr.Call expr)
+        {
+            return parenthesize("call", expr.Callee);
         }
 
         private string parenthesize(string name, params Expr[] exprs) {
@@ -48,7 +52,5 @@ namespace crafting_interpreters
 
             return builder.ToString();
         }
-
-
     }
 }

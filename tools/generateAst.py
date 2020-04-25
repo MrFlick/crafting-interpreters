@@ -103,6 +103,7 @@ if __name__=="__main__":
     defineAst("../", "Expr", [
         "Assign:    Token name, Expr value",
         "Binary:    Expr left, Token op, Expr right",
+        "Call:      Expr callee, Token paren, List<Expr> arguments",
         "Ternary:   Expr cond, Expr ifTrue, Expr ifFalse",
         "Grouping:  Expr expression",
         "Literal:   Object value",
@@ -113,8 +114,10 @@ if __name__=="__main__":
     defineAst("../", "Stmt", [
         "Block:       List<Stmt> statements",
         "Expression:  Expr expr",
+        "Function:    Token name, List<Token> parameters, List<Stmt> body",
         "If:          Expr cond, Stmt thenBranch, Stmt elseBranch",
         "Print:       Expr expr",
+        "Return:      Token keyword, Expr value",
         "Var:         Token name, Expr initilizer",
         "While:       Expr cond, Stmt body",
     ])
