@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace crafting_interpreters
 {
-
     class Lox
     {
         static Boolean hadError = false;
@@ -38,14 +37,24 @@ namespace crafting_interpreters
             if (hadError) Environment.Exit(65);
             Scanner scanner = new Scanner(source);
             List<Token> tokens = scanner.scanTokens();
+            Parser parser = new Parser(tokens);
+            Expr expr = parser.parse();
 
-            foreach (Token token in tokens) {
-                Console.WriteLine(token);
-            }
+            if (hadError) return;
+
+            Console.WriteLine(new AstPrinter().print(expr));
         }
 
         public static void error(int line, string message) {
             report(line, "", message);
+        }
+
+        public static void error(Token token, string message) {
+            if (token.Type == TokenType.EOF) {
+                report(token.Line, "at end", message);
+            } else {
+                report(token.Line, $" at '{token.Lexeme}'", message);
+            }
         }
 
         private static void report(int line, string where, string message) {

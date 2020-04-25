@@ -10,6 +10,9 @@ namespace crafting_interpreters
         public string visitBinaryExpr(Expr.Binary expr) {
             return parenthesize(expr.Op.Lexeme, expr.Left, expr.Right);
         }
+        public string visitTernaryExpr(Expr.Ternary expr) {
+            return parenthesize("ternary", expr.Cond, expr.IfTrue, expr.IfFalse);
+        }
         public string visitGroupingExpr(Expr.Grouping expr) {
             return parenthesize("group", expr.Expression);
         }

@@ -4,6 +4,7 @@ namespace crafting_interpreters {
     abstract class Expr {
         public interface Visitor<R> {
             R visitBinaryExpr(Binary expr);
+            R visitTernaryExpr(Ternary expr);
             R visitGroupingExpr(Grouping expr);
             R visitLiteralExpr(Literal expr);
             R visitUnaryExpr(Unary expr);
@@ -20,6 +21,19 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitBinaryExpr(this);
+            }
+        }
+        public class Ternary : Expr {
+            public readonly Expr Cond;
+            public readonly Expr IfTrue;
+            public readonly Expr IfFalse;
+            public Ternary(Expr cond, Expr ifTrue, Expr ifFalse) {
+                Cond = cond;
+                IfTrue = ifTrue;
+                IfFalse = ifFalse;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitTernaryExpr(this);
             }
         }
         public class Grouping : Expr {

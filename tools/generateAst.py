@@ -48,7 +48,7 @@ def defineType(f, baseName, className, fieldList):
 
     etypes = [x[0] for x in fielddefs]
     params = [x[1] for x in fielddefs]
-    fields = [x.capitalize() for x in params]
+    fields = [x[0].upper() + x[1:] for x in params]
 
     # fields
     for field, etype in zip(fields, etypes):
@@ -102,6 +102,7 @@ def defineAst(outputDir, baseName, types):
 if __name__=="__main__":
     defineAst("../", "Expr", [
         "Binary:    Expr left, Token op, Expr right",
+        "Ternary:   Expr cond, Expr ifTrue, Expr ifFalse",
         "Grouping:  Expr expression",
         "Literal:   Object value",
         "Unary:     Token op, Expr right"
