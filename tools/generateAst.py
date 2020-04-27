@@ -110,13 +110,14 @@ if __name__=="__main__":
         "Literal:   Object value",
         "Logical:   Expr left, Token op, Expr right",
         "Set:       Expr instance, Token name, Expr value",
+        "Super:     Token keyword, Token method",
         "This:      Token keyword",
         "Unary:     Token op, Expr right",
         "Variable:  Token name",
     ])
     defineAst("../", "Stmt", [
         "Block:       List<Stmt> statements",
-        "Class:       Token name, List<Stmt.Function> methods",
+        "Class:       Token name, Expr.Variable superClass, List<Stmt.Function> methods",
         "Expression:  Expr expr",
         "Function:    Token name, List<Token> parameters, List<Stmt> body",
         "If:          Expr cond, Stmt thenBranch, Stmt elseBranch",

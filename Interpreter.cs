@@ -135,6 +135,21 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitSuperExpr(Expr.Super expr) {
+            int distance = locals[expr];
+            LoxClass superClass = (LoxClass)env.getAt(
+                distance, "super");
+            LoxInstance instance = (LoxInstance)env.getAt(
+                distance - 1, "this");
+
+            LoxFunction method = superClass.findMethod(expr.Method.Lexeme);
+            if(method == null) {
+                throw new RuntimeError(expr.Method,
+                    $"Undefined propert '{expr.Method.Lexeme}'");
+            }
+            return method.bind(instance);
+        }
+
         public object visitThisExpr(Expr.This expr) {
             return lookUpVariable(expr.Keyword, expr);
         }
@@ -235,7 +250,21 @@ namespace crafting_interpreters
         }
 
         public object visitClassStmt(Stmt.Class stmt) {
+            object superClass = null;
+            if(stmt.SuperClass != null) {
+                superClass = evaluate(stmt.SuperClass);
+                if (!(superClass is LoxClass)) {
+                    throw new RuntimeError(stmt.SuperClass.Name,
+                    "Superclass must be a class.");
+                }
+            }
+
             env.define(stmt.Name.Lexeme, null);
+
+            if(stmt.SuperClass != null) {
+                env = new Envir(env);
+                env.define("super", superClass);
+            }
 
             Dictionary<string, LoxFunction> methods = new Dictionary<string, LoxFunction>();
             foreach(Stmt.Function method in stmt.Methods) {
@@ -244,7 +273,14 @@ namespace crafting_interpreters
                 methods[method.Name.Lexeme] = function;
             }
 
-            LoxClass klass = new LoxClass(stmt.Name.Lexeme, methods);
+            LoxClass klass = new LoxClass(stmt.Name.Lexeme, 
+                (LoxClass)superClass, methods);
+
+
+            if (stmt.SuperClass != null) {
+                env = env.Enclosing;
+            }
+
             env.assign(stmt.Name, klass);
             return null;
         }

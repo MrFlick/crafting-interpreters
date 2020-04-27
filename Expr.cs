@@ -12,6 +12,7 @@ namespace crafting_interpreters {
             R visitLiteralExpr(Literal expr);
             R visitLogicalExpr(Logical expr);
             R visitSetExpr(Set expr);
+            R visitSuperExpr(Super expr);
             R visitThisExpr(This expr);
             R visitUnaryExpr(Unary expr);
             R visitVariableExpr(Variable expr);
@@ -120,6 +121,17 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitSetExpr(this);
+            }
+        }
+        public class Super : Expr {
+            public readonly Token Keyword;
+            public readonly Token Method;
+            public Super(Token keyword, Token method) {
+                Keyword = keyword;
+                Method = method;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitSuperExpr(this);
             }
         }
         public class This : Expr {

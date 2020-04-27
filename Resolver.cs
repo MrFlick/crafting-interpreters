@@ -22,6 +22,7 @@ namespace crafting_interpreters
         private enum ClassType {
             NONE,
             CLASS,
+            SUBCLASS,
         }
 
         public void resolve(List<Stmt> statements) {
@@ -113,6 +114,21 @@ namespace crafting_interpreters
             declare(stmt.Name);
             define(stmt.Name);
 
+            if (stmt.SuperClass != null && 
+                stmt.Name.Lexeme == stmt.SuperClass.Name.Lexeme) {
+                    Lox.error(stmt.SuperClass.Name, 
+                    "A class cannot inherit from itself");
+            }
+            if (stmt.SuperClass != null) {
+                currentClass = ClassType.SUBCLASS;
+                resolve(stmt.SuperClass);
+            }
+
+            if (stmt.SuperClass != null) {
+                beginScope();
+                scopes.Peek()["super"] = true;
+            }
+
             beginScope();
             scopes.Peek()["this"] = true;
             
@@ -125,6 +141,8 @@ namespace crafting_interpreters
             }
             
             endScope();
+
+            if (stmt.SuperClass != null) endScope();
 
             currentClass = enclosingClass;
             return null;
@@ -190,6 +208,18 @@ namespace crafting_interpreters
         public object visitSetExpr(Expr.Set expr) {
             resolve(expr.Value);
             resolve(expr.Instance);
+            return null;
+        }
+
+        public object visitSuperExpr(Expr.Super expr) {
+            if (currentClass == ClassType.NONE) {
+                Lox.error(expr.Keyword, 
+                    "Cannot use 'super' outisde of class");
+            } else if(currentClass != ClassType.SUBCLASS) {
+                Lox.error(expr.Keyword,
+                    "Cannot use 'super' in a class with no superclass");
+            }
+            resolveLocal(expr, expr.Keyword);
             return null;
         }
 

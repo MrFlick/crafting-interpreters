@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace crafting_interpreters
 {
     class Envir {
-        readonly Envir Enclosing;
+        public readonly Envir Enclosing;
         private readonly Dictionary<string, object> Values;
 
         public Envir()

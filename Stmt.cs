@@ -25,9 +25,11 @@ namespace crafting_interpreters {
         }
         public class Class : Stmt {
             public readonly Token Name;
+            public readonly Expr.Variable SuperClass;
             public readonly List<Stmt.Function> Methods;
-            public Class(Token name, List<Stmt.Function> methods) {
+            public Class(Token name, Expr.Variable superClass, List<Stmt.Function> methods) {
                 Name = name;
+                SuperClass = superClass;
                 Methods = methods;
             }
             public override R accept<R>(Visitor<R> visitor) {

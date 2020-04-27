@@ -7,10 +7,12 @@ namespace crafting_interpreters
     {
         public readonly string Name;
         public readonly Dictionary<string, LoxFunction> Methods;
+        public readonly LoxClass SuperClass;
 
-        public LoxClass(string name, Dictionary<string, LoxFunction> methods)
+        public LoxClass(string name, LoxClass superClass, Dictionary<string, LoxFunction> methods)
         {
             Name = name;
+            SuperClass = superClass;
             Methods = methods;
         }
 
@@ -36,6 +38,10 @@ namespace crafting_interpreters
             LoxFunction method;
             if(Methods.TryGetValue(name, out method)) {
                 return method;
+            }
+
+            if (SuperClass != null) {
+                return SuperClass.findMethod(name);
             }
 
             return null;
