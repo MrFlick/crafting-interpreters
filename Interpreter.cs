@@ -7,6 +7,7 @@ namespace crafting_interpreters
     {
         public Envir globals = new Envir();
         private Envir env;
+        private readonly Dictionary<Expr, int> locals = new Dictionary<Expr, int>();
 
         public Interpreter()
         {
@@ -135,7 +136,16 @@ namespace crafting_interpreters
 
         public object visitVariableExpr(Expr.Variable expr)
         {
-            return env.get(expr.Name);
+            return lookUpVariable(expr.Name, expr);
+        }
+
+        public object lookUpVariable(Token name, Expr expr) {
+            int distance = 0;
+            if (locals.TryGetValue(expr, out distance)) {
+                return env.getAt(distance, name.Lexeme);
+            } else {
+                return globals.get(name);
+            }
         }
 
         private void checkNumberOperator(Token op, object operand) {
@@ -171,6 +181,10 @@ namespace crafting_interpreters
 
         private void execute(Stmt statement) {
             statement.accept(this);
+        }
+
+        public void resolve(Expr expr, int depth) {
+            locals[expr] = depth;
         }
 
         public void executeBlock(List<Stmt> statements, Envir envir)

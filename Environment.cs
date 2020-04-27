@@ -21,6 +21,18 @@ namespace crafting_interpreters
             Values[name] = value;
         }
 
+        Envir ancestor(int distance) {
+            Envir envir = this;
+            for(int i =0; i<distance; i++) {
+                envir = envir.Enclosing;
+            }
+            return envir;
+        }
+
+        public object getAt(int distance, string name) {
+            return ancestor(distance).Values[name];
+        }
+
         public object get(Token name) {
             if (Values.ContainsKey(name.Lexeme)) {
                 return Values.GetValueOrDefault(name.Lexeme);

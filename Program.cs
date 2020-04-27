@@ -46,6 +46,11 @@ namespace crafting_interpreters
 
             if (hadError) return;
 
+            Resolver resolver = new Resolver(Interpreter);
+            resolver.resolve(statements);
+
+            if (hadError) return;
+
             Interpreter.interpret(statements);
             
         }
