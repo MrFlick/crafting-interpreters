@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace crafting_interpreters
@@ -5,8 +6,11 @@ namespace crafting_interpreters
      class LoxFunction : LoxCallable {
         private readonly Stmt.Function Declaration;
         private readonly Envir Closure;
+        private readonly bool IsInitializer;
 
-        public LoxFunction(Stmt.Function declaration, Envir closure) {
+        public LoxFunction(Stmt.Function declaration, Envir closure,
+            bool isInitializer) {
+            IsInitializer = isInitializer;
             Closure = closure;
             Declaration = declaration;
         }
@@ -25,9 +29,18 @@ namespace crafting_interpreters
             try {
                 interpreter.executeBlock(Declaration.Body, envir);
             } catch (LoxReturn returnValue) {
+                if (IsInitializer) return Closure.getAt(0, "this");
                 return returnValue.Value;
             }
+            if(IsInitializer) return Closure.getAt(0, "this");
             return null;
+        }
+
+        internal LoxFunction bind(LoxInstance instance)
+        {
+            Envir envir = new Envir(Closure);
+            envir.define("this", instance);
+            return new LoxFunction(Declaration, envir, IsInitializer);
         }
 
         public override string ToString() {

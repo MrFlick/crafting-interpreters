@@ -89,6 +89,16 @@ namespace crafting_interpreters
             return function.call(this, args);
         }
 
+        public object visitGetExpr(Expr.Get expr) {
+            Object instance = evaluate(expr.Instance);
+            if(instance is LoxInstance) {
+                return ((LoxInstance) instance).get(expr.Name);
+            }
+
+            throw new RuntimeError(expr.Name, 
+                "Only instances have properties");
+        }
+
         public object visitGroupingExpr(Expr.Grouping expr)
         {
             return evaluate(expr.Expression);
@@ -110,6 +120,23 @@ namespace crafting_interpreters
             }
             
             return evaluate(expr.Right);
+        }
+
+        public object visitSetExpr(Expr.Set expr) 
+        {
+            object instance = evaluate(expr.Instance);
+
+            if(!(instance is LoxInstance)) {
+                throw new RuntimeError(expr.Name, "Only instances have fields");
+            }
+
+            object value = evaluate(expr.Value);
+            ((LoxInstance)instance).set(expr.Name, value);
+            return null;
+        }
+
+        public object visitThisExpr(Expr.This expr) {
+            return lookUpVariable(expr.Keyword, expr);
         }
 
         public object visitTernaryExpr(Expr.Ternary expr)
@@ -207,6 +234,21 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitClassStmt(Stmt.Class stmt) {
+            env.define(stmt.Name.Lexeme, null);
+
+            Dictionary<string, LoxFunction> methods = new Dictionary<string, LoxFunction>();
+            foreach(Stmt.Function method in stmt.Methods) {
+                LoxFunction function = new LoxFunction(method, env,
+                    method.Name.Lexeme == "init");
+                methods[method.Name.Lexeme] = function;
+            }
+
+            LoxClass klass = new LoxClass(stmt.Name.Lexeme, methods);
+            env.assign(stmt.Name, klass);
+            return null;
+        }
+
         public object visitExpressionStmt(Stmt.Expression stmt)
         {
             object value = evaluate(stmt.Expr);
@@ -215,7 +257,7 @@ namespace crafting_interpreters
 
         public object visitFunctionStmt(Stmt.Function stmt)
         {
-            LoxFunction function = new LoxFunction(stmt, env);
+            LoxFunction function = new LoxFunction(stmt, env, false);
             env.define(stmt.Name.Lexeme, function);
             return null;
         }

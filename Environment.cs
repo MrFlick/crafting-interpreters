@@ -23,7 +23,7 @@ namespace crafting_interpreters
 
         Envir ancestor(int distance) {
             Envir envir = this;
-            for(int i =0; i<distance; i++) {
+            for(int i = 0; i<distance; i++) {
                 envir = envir.Enclosing;
             }
             return envir;

@@ -6,10 +6,13 @@ namespace crafting_interpreters {
             R visitAssignExpr(Assign expr);
             R visitBinaryExpr(Binary expr);
             R visitCallExpr(Call expr);
+            R visitGetExpr(Get expr);
             R visitTernaryExpr(Ternary expr);
             R visitGroupingExpr(Grouping expr);
             R visitLiteralExpr(Literal expr);
             R visitLogicalExpr(Logical expr);
+            R visitSetExpr(Set expr);
+            R visitThisExpr(This expr);
             R visitUnaryExpr(Unary expr);
             R visitVariableExpr(Variable expr);
         }
@@ -49,6 +52,17 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitCallExpr(this);
+            }
+        }
+        public class Get : Expr {
+            public readonly Expr Instance;
+            public readonly Token Name;
+            public Get(Expr instance, Token name) {
+                Instance = instance;
+                Name = name;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitGetExpr(this);
             }
         }
         public class Ternary : Expr {
@@ -93,6 +107,28 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitLogicalExpr(this);
+            }
+        }
+        public class Set : Expr {
+            public readonly Expr Instance;
+            public readonly Token Name;
+            public readonly Expr Value;
+            public Set(Expr instance, Token name, Expr value) {
+                Instance = instance;
+                Name = name;
+                Value = value;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitSetExpr(this);
+            }
+        }
+        public class This : Expr {
+            public readonly Token Keyword;
+            public This(Token keyword) {
+                Keyword = keyword;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitThisExpr(this);
             }
         }
         public class Unary : Expr {

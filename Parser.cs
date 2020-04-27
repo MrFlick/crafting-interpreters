@@ -35,6 +35,10 @@ namespace crafting_interpreters
                 if (expr is Expr.Variable) {
                     Token name = ((Expr.Variable)expr).Name;
                     return new Expr.Assign(name, value);
+                } else if (expr is Expr.Get) {
+                    Expr.Get get = (Expr.Get)expr;
+                    return new Expr.Set(get.Instance, get.Name, value);
+
                 }
                 error(equals, "Invalid assignment target.");
             }
@@ -64,6 +68,7 @@ namespace crafting_interpreters
         private Stmt declaration() {
             try {
                 if (match(TokenType.VAR)) return varDeclaration();
+                if (match(TokenType.CLASS)) return classDelaration();
                 if (match(TokenType.FUN)) return function("function");
                 return statement();
             } catch (ParseError) {
@@ -183,6 +188,19 @@ namespace crafting_interpreters
             return new Stmt.Var(name, initializer);
         }
 
+        private Stmt classDelaration() {
+            Token name = consume(TokenType.IDENTIFIER, "Expect class name");
+            consume(TokenType.LEFT_BRACE, "Expect '{' before class body");
+
+            var methods = new List<Stmt.Function>();
+            while(!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+                methods.Add(function("method"));
+            }
+            consume(TokenType.RIGHT_BRACE, "Expect '}' after class body");
+
+            return new Stmt.Class(name, methods);
+        }
+
         private Stmt whileStatement() {
             consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'");
             Expr cond = expression();
@@ -300,6 +318,10 @@ namespace crafting_interpreters
             while(true) {
                 if(match(TokenType.LEFT_PAREN)) {
                     expr = finishCall(expr);
+                } if (match(TokenType.DOT)) {
+                    Token name = consume(TokenType.IDENTIFIER,
+                     "Expet property name after '.'");
+                    expr = new Expr.Get(expr, name);
                 } else {
                     break;
                 }
@@ -331,6 +353,8 @@ namespace crafting_interpreters
             if (match(TokenType.NUMBER, TokenType.STRING)) {
                 return new Expr.Literal(previous().Literal);
             }
+            if(match(TokenType.THIS)) return new Expr.This(previous());
+            
             if(match(TokenType.IDENTIFIER)) {
                 return new Expr.Variable(previous());
             }

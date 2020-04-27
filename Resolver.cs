@@ -7,6 +7,7 @@ namespace crafting_interpreters
         private readonly Interpreter Interpreter;
         private readonly Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
         private FunctionType currentFunction = FunctionType.NONE;
+        private ClassType currentClass = ClassType.NONE;
 
         public Resolver(Interpreter interpreter) {
             Interpreter = interpreter;
@@ -15,6 +16,12 @@ namespace crafting_interpreters
         private enum FunctionType {
             NONE,
             FUNCTION,
+            INITIALIZER,
+            METHOD,
+        }
+        private enum ClassType {
+            NONE,
+            CLASS,
         }
 
         public void resolve(List<Stmt> statements) {
@@ -98,12 +105,42 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitClassStmt(Stmt.Class stmt)
+        {
+            ClassType enclosingClass = currentClass;
+            currentClass = ClassType.CLASS;
+
+            declare(stmt.Name);
+            define(stmt.Name);
+
+            beginScope();
+            scopes.Peek()["this"] = true;
+            
+            foreach(Stmt.Function method in stmt.Methods) {
+                FunctionType declaration = FunctionType.METHOD;
+                if (method.Name.Lexeme == "init") {
+                    declaration = FunctionType.INITIALIZER;
+                }
+                resolveFunction(method, declaration);
+            }
+            
+            endScope();
+
+            currentClass = enclosingClass;
+            return null;
+        }
+
         public object visitCallExpr(Expr.Call expr)
         {
             resolve(expr.Callee);
             foreach(Expr arg in expr.Arguments) {
                 resolve(arg);
             }
+            return null;
+        }
+
+        public object visitGetExpr(Expr.Get expr) {
+            resolve(expr.Instance);
             return null;
         }
 
@@ -150,6 +187,22 @@ namespace crafting_interpreters
             return null;
         }
 
+        public object visitSetExpr(Expr.Set expr) {
+            resolve(expr.Value);
+            resolve(expr.Instance);
+            return null;
+        }
+
+        public object visitThisExpr(Expr.This expr) {
+            if (currentClass == ClassType.NONE) {
+                Lox.error(expr.Keyword,
+                    "Cannot use `this` outside of class");
+                return null;
+            }
+            resolveLocal(expr, expr.Keyword);
+            return null;
+        }
+
         public object visitPrintStmt(Stmt.Print stmt)
         {
             if(stmt.Expr != null) {
@@ -164,6 +217,10 @@ namespace crafting_interpreters
                 Lox.error(stmt.Keyword, "Cannot return from top-level code");
             }
             if(stmt.Value != null) {
+                if (currentFunction == FunctionType.INITIALIZER) {
+                    Lox.error(stmt.Keyword,
+                        "Cannot return a value from initilizer;");
+                }
                 resolve(stmt.Value);
             }
             return null;

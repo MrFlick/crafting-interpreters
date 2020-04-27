@@ -4,6 +4,7 @@ namespace crafting_interpreters {
     abstract class Stmt {
         public interface Visitor<R> {
             R visitBlockStmt(Block stmt);
+            R visitClassStmt(Class stmt);
             R visitExpressionStmt(Expression stmt);
             R visitFunctionStmt(Function stmt);
             R visitIfStmt(If stmt);
@@ -20,6 +21,17 @@ namespace crafting_interpreters {
             }
             public override R accept<R>(Visitor<R> visitor) {
                 return visitor.visitBlockStmt(this);
+            }
+        }
+        public class Class : Stmt {
+            public readonly Token Name;
+            public readonly List<Stmt.Function> Methods;
+            public Class(Token name, List<Stmt.Function> methods) {
+                Name = name;
+                Methods = methods;
+            }
+            public override R accept<R>(Visitor<R> visitor) {
+                return visitor.visitClassStmt(this);
             }
         }
         public class Expression : Stmt {

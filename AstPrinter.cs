@@ -52,5 +52,20 @@ namespace crafting_interpreters
 
             return builder.ToString();
         }
+
+        public string visitGetExpr(Expr.Get expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string visitSetExpr(Expr.Set expr)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string visitThisExpr(Expr.This expr)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

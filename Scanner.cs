@@ -106,6 +106,7 @@ namespace crafting_interpreters
             }
             if (isAtEnd()) {
                 Lox.error(line, "Unterminated string");
+                return;
             }
             advance();
 
