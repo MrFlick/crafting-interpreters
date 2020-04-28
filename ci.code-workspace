@@ -1,0 +1,18 @@
+{
+    "folders": [
+      {
+        "name": "tree-walker (C#)",
+        "path": "tree-walker"
+      },
+      {
+        "name": "virtual-machine (C)",
+        "path": "virtual-machine"
+      },
+    ],
+    "extensions": {
+      "recommendations": [
+        "ms-vscode.cpptools",
+        "ms-dotnettools.csharp",
+      ]
+    }
+  }

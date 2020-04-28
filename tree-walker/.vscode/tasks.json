@@ -2,16 +2,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "Build ilox",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/crafting-interpreters.csproj",
+                "${workspaceFolder}/tree-walker.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
-            "problemMatcher": "$msCompile"
+            "problemMatcher": "$msCompile",
+            "group": "build",
         },
         {
             "label": "publish",
@@ -19,7 +20,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/crafting-interpreters.csproj",
+                "${workspaceFolder}/tree-walker.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +33,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/crafting-interpreters.csproj",
+                "${workspaceFolder}/tree-walker.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
