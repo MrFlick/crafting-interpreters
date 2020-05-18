@@ -13,3 +13,6 @@
 #define UINT8_COUNT (UINT8_MAX+1)
 
 #endif
+
+#undef DEBUG_STRSS_GC
+#undef DEBUG_LOG_GC
